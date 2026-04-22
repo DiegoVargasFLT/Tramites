@@ -682,9 +682,13 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
-                          <button 
+                          <button
                              disabled={isDeleting === tramite.id}
-                             className="hidden"
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               deleteTramite(tramite.id);
+                             }}
+                             className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
                           >
                             {isDeleting === tramite.id ? (
                                 <RefreshCw className="w-4 h-4 animate-spin" />
