@@ -57,10 +57,10 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
         supabase.from('tramites').select(`
           *,
           perfiles:perfiles(id, nombre_completo),
-          entidades:Entidades(id, Entidad)
+          entidades:entidades(id, entidad)
         `).order('fecha_radicacion', { ascending: false }),
         supabase.from('perfiles').select('id, nombre_completo').order('nombre_completo'),
-        supabase.from('Entidades').select('id, Entidad').order('Entidad')
+        supabase.from('entidades').select('id, entidad').order('entidad')
       ]);
 
       console.log("Resultado Trámites:", tramitesRes);
@@ -163,7 +163,7 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
       const { data, error } = await supabase
         .from('tramites')
         .insert([newTramiteData])
-        .select(`*, perfiles:perfiles(id, nombre_completo), entidades:Entidades(id, Entidad)`);
+        .select(`*, perfiles:perfiles(id, nombre_completo), entidades:entidades(id, entidad)`);
       
       if (error) {
         alert(`Error al crear: ${error.message}`);
@@ -314,7 +314,7 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
     filteredTramites.forEach((t) => {
       const row = worksheet.addRow({
         nombre: t.nombre,
-        entidad: t.entidades?.Entidad || 'Sin entidad',
+        entidad: t.entidades?.entidad || 'Sin entidad',
         fecha_radicacion: formatDate(t.fecha_radicacion),
         fecha_estimada: formatDate(t.fecha_estimada),
         responsable: t.perfiles?.nombre_completo || 'Sin asignar',
@@ -454,7 +454,7 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
               onChange={e => setFilters({...filters, entidad: e.target.value})}
             >
               <option value="">Cualquiera</option>
-              {entidades.map(ent => <option key={ent.id} value={ent.id}>{ent.Entidad}</option>)}
+              {entidades.map(ent => <option key={ent.id} value={ent.id}>{ent.entidad}</option>)}
             </select>
           </div>
           <div className="space-y-1.5">
@@ -547,13 +547,13 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
                         >
                           <option value="">Sin definir</option>
                           {entidades.map(ent => (
-                            <option key={ent.id} value={ent.id}>{ent.Entidad}</option>
+                            <option key={ent.id} value={ent.id}>{ent.entidad}</option>
                           ))}
                         </select>
                       </div>
                     ) : (
                       <span className="px-2.5 py-1 bg-slate-100 text-[#1F3B6F] rounded-md text-[10px] font-black uppercase tracking-wider border border-slate-200">
-                        {tramite.entidades?.Entidad || 'N/A'}
+                        {tramite.entidades?.entidad || 'N/A'}
                       </span>
                     )}
                   </td>

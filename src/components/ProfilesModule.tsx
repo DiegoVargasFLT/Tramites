@@ -32,8 +32,8 @@ export const ProfilesModule = ({ onDataChange }: { onDataChange?: () => void }) 
         { id: '2', nombre_completo: 'Carlos Ruiz' }
       ]);
       setEntidades([
-        { id: '1', Entidad: 'Secretaría de Planeación' },
-        { id: '2', Entidad: 'IDU' }
+        { id: '1', entidad: 'Secretaría de Planeación' },
+        { id: '2', entidad: 'IDU' }
       ]);
       setLoading(false);
       return;
@@ -42,7 +42,7 @@ export const ProfilesModule = ({ onDataChange }: { onDataChange?: () => void }) 
     try {
       const [pRes, eRes] = await Promise.all([
         supabase.from('perfiles').select('*').order('nombre_completo'),
-        supabase.from('Entidades').select('*').order('Entidad')
+        supabase.from('entidades').select('*').order('entidad')
       ]);
       
       if (pRes.data) setPerfiles(pRes.data);
@@ -59,14 +59,14 @@ export const ProfilesModule = ({ onDataChange }: { onDataChange?: () => void }) 
     
     const supabase = getSupabase();
     const isProfile = activeSubTab === 'perfiles';
-    const tableName = isProfile ? 'perfiles' : 'Entidades';
-    const fieldName = isProfile ? 'nombre_completo' : 'Entidad';
+    const tableName = isProfile ? 'perfiles' : 'entidades';
+    const fieldName = isProfile ? 'nombre_completo' : 'entidad';
     const defaultValue = isProfile ? 'Nuevo Responsable' : 'Nueva Entidad';
-    
+
     const tempId = 'temp-' + Date.now();
-    const newLocal = isProfile 
+    const newLocal = isProfile
       ? { id: tempId, nombre_completo: defaultValue } as Perfil
-      : { id: tempId, Entidad: defaultValue } as Entidad;
+      : { id: tempId, entidad: defaultValue } as Entidad;
 
     if (isProfile) setPerfiles(prev => [newLocal as Perfil, ...prev]);
     else setEntidades(prev => [newLocal as Entidad, ...prev]);
@@ -122,7 +122,7 @@ export const ProfilesModule = ({ onDataChange }: { onDataChange?: () => void }) 
 
   const deleteEntry = async (id: string) => {
     const isProfile = activeSubTab === 'perfiles';
-    const tableName = isProfile ? 'perfiles' : 'Entidades';
+    const tableName = isProfile ? 'perfiles' : 'entidades';
     const label = isProfile ? 'responsable' : 'entidad';
     
     if (!confirm(`¿Estás seguro de eliminar este ${label}? Esto podría afectar a los trámites asociados.`)) return;
@@ -157,9 +157,9 @@ export const ProfilesModule = ({ onDataChange }: { onDataChange?: () => void }) 
   const saveEdit = async () => {
     if (!editingId) return;
     const isProfile = activeSubTab === 'perfiles';
-    const tableName = isProfile ? 'perfiles' : 'Entidades';
-    const fieldName = isProfile ? 'nombre_completo' : 'Entidad';
-    
+    const tableName = isProfile ? 'perfiles' : 'entidades';
+    const fieldName = isProfile ? 'nombre_completo' : 'entidad';
+
     const latestValue = editForm[fieldName];
     if (!latestValue || latestValue.trim() === '') {
        alert("El nombre no puede estar vacío.");
@@ -201,7 +201,7 @@ export const ProfilesModule = ({ onDataChange }: { onDataChange?: () => void }) 
   };
 
   const filteredData = (activeSubTab === 'perfiles' ? perfiles : entidades).filter((item: any) => {
-    const val = activeSubTab === 'perfiles' ? item.nombre_completo : item.Entidad;
+    const val = activeSubTab === 'perfiles' ? item.nombre_completo : item.entidad;
     return val?.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
@@ -299,10 +299,10 @@ export const ProfilesModule = ({ onDataChange }: { onDataChange?: () => void }) 
               {editingId === item.id ? (
                 <input
                   type="text"
-                  value={activeSubTab === 'perfiles' ? (editForm.nombre_completo || '') : (editForm.Entidad || '')}
-                  onChange={(e) => setEditForm({ 
-                    ...editForm, 
-                    [activeSubTab === 'perfiles' ? 'nombre_completo' : 'Entidad']: e.target.value 
+                  value={activeSubTab === 'perfiles' ? (editForm.nombre_completo || '') : (editForm.entidad || '')}
+                  onChange={(e) => setEditForm({
+                    ...editForm,
+                    [activeSubTab === 'perfiles' ? 'nombre_completo' : 'entidad']: e.target.value
                   })}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') saveEdit();
@@ -327,7 +327,7 @@ export const ProfilesModule = ({ onDataChange }: { onDataChange?: () => void }) 
               ) : (
                 <>
                   <h3 className="text-azul-oceano font-bold text-lg mb-1 leading-tight">
-                    {activeSubTab === 'perfiles' ? item.nombre_completo : item.Entidad}
+                    {activeSubTab === 'perfiles' ? item.nombre_completo : item.entidad}
                   </h3>
                   <div className="text-[9px] uppercase tracking-[0.2em] text-slate-400 font-black">
                     {activeSubTab === 'perfiles' ? 'Responsable Asignado' : 'Entidad Vinculada'}

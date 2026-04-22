@@ -7,7 +7,7 @@ export interface Perfil {
 
 export interface Entidad {
   id: string;
-  Entidad: string;
+  entidad: string;
 }
 
 export interface Tramite {

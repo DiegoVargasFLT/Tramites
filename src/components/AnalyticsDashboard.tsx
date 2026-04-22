@@ -43,7 +43,7 @@ export const AnalyticsDashboard = ({ activeFilter, onChartClick }: { activeFilte
         .select(`
           estado,
           perfiles:perfiles(nombre_completo),
-          entidades:Entidades(Entidad)
+          entidades:entidades(entidad)
         `);
       
       if (tramiteErr) {
@@ -54,7 +54,7 @@ export const AnalyticsDashboard = ({ activeFilter, onChartClick }: { activeFilte
 
         tramitesRes.forEach((t: any) => {
           const respName = t.perfiles?.nombre_completo || 'Sin asignar';
-          const entName = t.entidades?.Entidad || 'Sin entidad';
+          const entName = t.entidades?.entidad || 'Sin entidad';
           const estado = t.estado || 'Pendiente';
 
           const respKey = `${respName}-${estado}`;
