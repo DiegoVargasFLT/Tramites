@@ -90,8 +90,16 @@ export default function App() {
       {/* Sidebar */}
       <aside className={`bg-[#1F3B6F] text-white flex flex-col hidden lg:flex border-r border-white/5 shadow-[rgba(0,0,0,0.2)_10px_0px_50px_-15px] z-20 transition-all duration-300 ease-in-out ${sidebarCollapsed ? 'w-20' : 'w-80'}`}>
         <div className={`p-6 flex items-center ${sidebarCollapsed ? 'justify-center p-4' : 'justify-between'}`}>
-          {!sidebarCollapsed && <Logo variant="white" size="sm" />}
-          <button 
+          {!sidebarCollapsed && (
+            <div className="flex-1 flex items-center justify-center">
+              <img 
+                src="/Logo.png" 
+                alt="Lagos de Torca" 
+                className="h-12 object-contain"
+              />
+            </div>
+          )}
+          <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             className={`p-2 hover:bg-white/10 rounded-xl transition-all ${sidebarCollapsed ? '' : 'text-white/40'}`}
           >
