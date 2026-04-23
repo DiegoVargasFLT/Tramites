@@ -95,7 +95,7 @@ export default function App() {
               <img 
                 src="/Logo.png" 
                 alt="Lagos de Torca" 
-                className="h-12 object-contain"
+                className="h-20 object-contain"
               />
             </div>
           )}
