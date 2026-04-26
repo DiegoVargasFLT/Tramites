@@ -23,7 +23,6 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Tramite>>({});
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
-  const [showResponsable, setShowResponsable] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
 
