@@ -535,13 +535,12 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
         <table className="w-full text-left border-collapse min-w-[1000px]">
           <thead>
             <tr className="bg-slate-50/50 text-[11px] font-bold uppercase tracking-widest text-[#1F3B6F]/50 border-b border-slate-100">
-              <th className={`px-6 py-5 transition-all duration-300 ${showResponsable ? 'w-[20%]' : 'w-[25%]'}`}>Trámite</th>
+              <th className="px-6 py-5 min-w-[160px]">Proyecto(s)</th>
               <th className="px-6 py-5 w-[110px]">Entidad</th>
+              <th className={`px-6 py-5 transition-all duration-300 w-[25%]`}>Trámite</th>
               <th className="px-6 py-5 w-[130px]">Radicación</th>
               <th className="px-6 py-5 w-[130px]">Estimado</th>
-              {showResponsable && <th className="px-6 py-5 w-[180px]">Responsable</th>}
               <th className="px-6 py-5 w-[110px]">Estado</th>
-              <th className="px-6 py-5 min-w-[160px]">Proyectos</th>
               <th className="px-6 py-5 min-w-[140px] max-w-[200px]">Observaciones</th>
               <th className="px-6 py-5 text-right w-[100px]">Acciones</th>
             </tr>
@@ -640,29 +639,6 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
                     )}
                   </td>
 
-                   {showResponsable && (
-                    <td className="px-6 py-5">
-                      {editingId === tramite.id ? (
-                        <select 
-                          className="w-full min-w-[150px] p-2.5 text-sm border border-slate-200 rounded-lg outline-none bg-white font-medium"
-                          value={editForm.responsable_id || ''}
-                          onChange={e => setEditForm({ ...editForm, responsable_id: e.target.value })}
-                        >
-                          <option value="">Sin asignar</option>
-                          {perfiles.map(p => (
-                            <option key={p.id} value={p.id}>{p.nombre_completo}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <div className="flex items-center gap-3 text-sm text-slate-700 min-w-[140px]">
-                          <div className="w-8 h-8 rounded-xl bg-torca-azul/10 flex items-center justify-center text-azul-oceano shadow-sm border border-torca-azul/20">
-                             <User className="w-4.5 h-4.5" />
-                          </div>
-                          <span className="font-bold text-[#1F3B6F] text-xs leading-none">{tramite.perfiles?.nombre_completo || 'Sin asignar'}</span>
-                        </div>
-                      )}
-                    </td>
-                   )}
 
                   <td className="px-6 py-5">
                     {editingId === tramite.id ? (
