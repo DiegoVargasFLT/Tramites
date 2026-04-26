@@ -7,7 +7,9 @@
       "Skill(update-config)",
       "mcp__supabase__execute_sql",
       "mcp__supabase__generate_typescript_types",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit '-mfeat: align local project with Supabase database updates *)",
+      "Bash(git push *)"
     ]
   }
 }
