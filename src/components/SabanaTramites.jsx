@@ -45,7 +45,7 @@ const SabanaTramites = () => {
           *,
           responsable:perfiles(id, nombre_completo, email),
           entidad:entidades(id, entidad),
-          tramites_proyectos(proyecto_id, proyectos(id, nombre))
+          
         `)
         .order('fecha_radicacion', { ascending: false });
 
@@ -95,16 +95,16 @@ const SabanaTramites = () => {
     return entidad ? entidad.entidad : 'Sin entidad';
   };
 
-  const obtenerProyectos = (tramiteProyectos) => {
-    if (!tramiteProyectos || tramiteProyectos.length === 0) {
+  const obtenerProyectos = (tramite) => {
+    if (!tramite.proyectos || tramite.proyectos.length === 0) {
       return [];
     }
-    return tramiteProyectos.map(tp => tp.proyectos);
+    return tramite.proyectos;
   };
 
   const iniciarEdicion = async (tramite) => {
     setEditingId(tramite.id);
-    const proyectosDelTramite = tramite.tramites_proyectos?.map(tp => tp.proyectos?.id) || [];
+    const proyectosDelTramite = tramite.proyectos || [];
     
     setEditFormData({
       nombre: tramite.nombre,
@@ -151,34 +151,13 @@ const SabanaTramites = () => {
           responsable_id: editFormData.responsable_id || null,
           observacion: editFormData.observacion,
           estado: editFormData.estado,
+          proyectos: editFormData.proyectos_seleccionados,
           actualizado_en: new Date().toISOString()
         })
         .eq('id', editingId);
 
       if (updateError) throw updateError;
 
-      // Actualizar proyectos
-      // Primero, eliminar proyectos antiguos
-      const { error: deleteError } = await supabase
-        .from('tramites_proyectos')
-        .delete()
-        .eq('tramite_id', editingId);
-
-      if (deleteError) throw deleteError;
-
-      // Luego, insertar proyectos nuevos
-      if (editFormData.proyectos_seleccionados.length > 0) {
-        const proyectosAInsertar = editFormData.proyectos_seleccionados.map(proyecto_id => ({
-          tramite_id: editingId,
-          proyecto_id: proyecto_id
-        }));
-
-        const { error: insertError } = await supabase
-          .from('tramites_proyectos')
-          .insert(proyectosAInsertar);
-
-        if (insertError) throw insertError;
-      }
 
       // Recargar datos
       await cargarDatos();
@@ -400,13 +379,13 @@ const SabanaTramites = () => {
                       </td>
                       <td>
                         <div className="proyectos-cell">
-                          {obtenerProyectos(tramite.tramites_proyectos).length === 0 ? (
+                          {!tramite.proyectos || tramite.proyectos.length === 0 ? (
                             <span className="sin-proyectos">Sin proyectos</span>
                           ) : (
                             <div className="proyectos-lista">
-                              {obtenerProyectos(tramite.tramites_proyectos).map((proyecto, idx) => (
+                              {tramite.proyectos.map((proyecto, idx) => (
                                 <span key={idx} className="proyecto-badge">
-                                  {proyecto.nombre}
+                                  {proyecto}
                                 </span>
                               ))}
                             </div>
