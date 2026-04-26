@@ -408,13 +408,6 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
         
         <div className="flex items-center gap-3">
           <button 
-            onClick={() => setShowResponsable(!showResponsable)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm ${showResponsable ? 'bg-slate-100 text-slate-600' : 'bg-torca-azul text-white animate-pulse'}`}
-            title={showResponsable ? "Ocultar Responsable" : "Mostrar Responsable"}
-          >
-            <User size={16} /> <span className="hidden sm:inline">{showResponsable ? 'Ocultar Resp.' : 'Mostrar Resp.'}</span>
-          </button>
-          <button 
             onClick={exportToExcel} 
             className="flex items-center gap-2 px-4 py-2 bg-verde-nocturno text-white rounded-xl text-sm font-bold hover:bg-opacity-90 transition-all shadow-md"
             title="Exportar a Excel"
