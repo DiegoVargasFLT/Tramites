@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { getSupabase } from '../lib/supabase';
-import { Tramite, EstadoTramite, Perfil, Entidad } from '../types';
+import { Tramite, EstadoTramite, Perfil, Entidad, Proyecto } from '../types';
 import { StatusBadge } from './StatusBadge';
 import { Edit2, Save, X, Plus, Trash2, Calendar, User, Search, RefreshCw, Download, Clock, Settings } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
@@ -18,6 +18,7 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
   const [tramites, setTramites] = useState<Tramite[]>([]);
   const [perfiles, setPerfiles] = useState<Perfil[]>([]);
   const [entidades, setEntidades] = useState<Entidad[]>([]);
+  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Tramite>>({});
@@ -53,31 +54,41 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
     setError(null);
     try {
       console.log("Ejecutando consultas en Supabase...");
-      const [tramitesRes, perfilesRes, entidadesRes] = await Promise.all([
+      const [tramitesRes, perfilesRes, entidadesRes, proyectosRes] = await Promise.all([
         supabase.from('tramites').select(`
           *,
           perfiles:perfiles(id, nombre_completo),
-          entidades:entidades(id, entidad)
+          entidades:entidades(id, entidad),
+          tramites_proyectos:tramites_proyectos(proyecto_id)
         `).order('fecha_radicacion', { ascending: false }),
         supabase.from('perfiles').select('id, nombre_completo').order('nombre_completo'),
-        supabase.from('entidades').select('id, entidad').order('entidad')
+        supabase.from('entidades').select('id, entidad').order('entidad'),
+        supabase.from('proyectos').select('id, nombre, descripcion').order('nombre')
       ]);
 
       console.log("Resultado Trámites:", tramitesRes);
       console.log("Resultado Perfiles:", perfilesRes);
       console.log("Resultado Entidades:", entidadesRes);
+      console.log("Resultado Proyectos:", proyectosRes);
 
       if (tramitesRes.error) {
         console.error("Error cargando trámites:", tramitesRes.error);
         setError(`Error de base de datos: ${tramitesRes.error.message}`);
-        // Intento de fallback si el join complejo falla
         const simpleTramites = await supabase.from('tramites').select('*').order('fecha_radicacion', { ascending: false });
-        if (!simpleTramites.error) {
-          console.log("Fallback: Cargados trámites simples sin relación.");
-          setTramites(simpleTramites.data || []);
-        }
+        if (!simpleTramites.error) setTramites(simpleTramites.data || []);
       } else {
-        setTramites(tramitesRes.data || []);
+        // Map junction rows to proyecto placeholders
+        const tramitesData = (tramitesRes.data || []).map(t => ({
+          ...t,
+          tramites_proyectos: (t.tramites_proyectos || []).map((tp: any) => ({
+            proyectos: {
+              id: tp.proyecto_id,
+              nombre: '',
+              descripcion: ''
+            }
+          }))
+        }));
+        setTramites(tramitesData);
       }
 
       if (perfilesRes.error) console.error("Error cargando perfiles:", perfilesRes.error);
@@ -85,9 +96,12 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
 
       if (entidadesRes.error) console.error("Error cargando entidades:", entidadesRes.error);
       else setEntidades(entidadesRes.data || []);
-      
+
+      if (proyectosRes.error) console.error("Error cargando proyectos:", proyectosRes.error);
+      else setProyectos(proyectosRes.data || []);
     } catch (err) {
       console.error("Excepción crítica en fetchData:", err);
+      setError("Error inesperado al obtener datos.");
     }
     setLoading(false);
   };
@@ -99,7 +113,7 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
 
   const saveEdit = async () => {
     if (!editingId) return;
-    
+
     const supabase = getSupabase();
     if (!supabase) {
         setTramites(prev => prev.map(t => t.id === editingId ? { ...t, ...editForm } as Tramite : t));
@@ -110,7 +124,7 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
     setLoading(true);
     const cleanData = {
       nombre: editForm.nombre,
-      entidad_id: editForm.entidad_id, 
+      entidad_id: editForm.entidad_id,
       observacion: editForm.observacion,
       fecha_radicacion: editForm.fecha_radicacion,
       fecha_estimada: editForm.fecha_estimada,
@@ -127,6 +141,33 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
       if (error) {
         alert(`Error al guardar: ${error.message}`);
       } else {
+        // Handle proyectos junction table
+        const selectedProyectos = (editForm.tramites_proyectos || []).map((tp: any) => tp.proyectos.id);
+
+        // Delete existing relations
+        const { error: delError } = await supabase
+          .from('tramites_proyectos')
+          .delete()
+          .eq('tramite_id', editingId);
+
+        if (delError) {
+          console.error('Error deleting proyectos relations:', delError);
+        }
+
+        // Insert new relations if any
+        if (selectedProyectos.length > 0) {
+          const insertData = selectedProyectos.map(proyecto_id => ({
+            tramite_id: editingId,
+            proyecto_id
+          }));
+          const { error: insError } = await supabase
+            .from('tramites_proyectos')
+            .insert(insertData);
+          if (insError) {
+            console.error('Error inserting proyectos relations:', insError);
+          }
+        }
+
         setEditingId(null);
         await fetchData();
         if (onDataChange) onDataChange();
@@ -284,6 +325,7 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
       { header: 'Fecha Estimada', key: 'fecha_estimada', width: 20 },
       { header: 'Responsable', key: 'responsable', width: 25 },
       { header: 'Estado', key: 'estado', width: 15 },
+      { header: 'Proyectos', key: 'proyectos', width: 30 },
       { header: 'Observaciones', key: 'observaciones', width: 50 },
     ];
 
@@ -312,6 +354,12 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
 
     // Agregar datos
     filteredTramites.forEach((t) => {
+      const proyectosStr = t.tramites_proyectos && t.tramites_proyectos.length > 0
+        ? t.tramites_proyectos.map((tp: any) => {
+            const p = proyectos.find(pr => pr.id === tp.proyectos.id);
+            return p ? p.nombre : '';
+          }).filter(Boolean).join(', ')
+        : 'Sin proyectos';
       const row = worksheet.addRow({
         nombre: t.nombre,
         entidad: t.entidades?.entidad || 'Sin entidad',
@@ -319,6 +367,7 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
         fecha_estimada: formatDate(t.fecha_estimada),
         responsable: t.perfiles?.nombre_completo || 'Sin asignar',
         estado: t.estado,
+        proyectos: proyectosStr,
         observaciones: t.observacion || ''
       });
 
@@ -492,6 +541,7 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
               <th className="px-6 py-5 w-[130px]">Estimado</th>
               {showResponsable && <th className="px-6 py-5 w-[180px]">Responsable</th>}
               <th className="px-6 py-5 w-[110px]">Estado</th>
+              <th className="px-6 py-5 min-w-[160px]">Proyectos</th>
               <th className="px-6 py-5 min-w-[140px] max-w-[200px]">Observaciones</th>
               <th className="px-6 py-5 text-right w-[100px]">Acciones</th>
             </tr>
@@ -628,6 +678,46 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
                       </select>
                     ) : (
                       <StatusBadge estado={tramite.estado} />
+                    )}
+                  </td>
+
+                  <td className="px-6 py-5">
+                    {editingId === tramite.id ? (
+                      <div className="space-y-1">
+                        <select
+                          multiple
+                          className="w-full p-2 text-xs border border-slate-200 rounded-lg outline-none bg-white font-medium h-24"
+                          value={(editForm.tramites_proyectos || []).map((tp: any) => tp.proyectos.id)}
+                          onChange={e => {
+                            const selectedIds = Array.from(e.target.selectedOptions, (option: any) => option.value);
+                            const selected = proyectos.filter(p => selectedIds.includes(p.id));
+                            setEditForm({
+                              ...editForm,
+                              tramites_proyectos: selected.map(p => ({ proyectos: p }))
+                            });
+                          }}
+                        >
+                          {proyectos.map(p => (
+                            <option key={p.id} value={p.id}>{p.nombre}</option>
+                          ))}
+                        </select>
+                        <div className="text-[9px] text-slate-400">Ctrl+click para múltiple</div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-1 max-w-[180px]">
+                        {tramite.tramites_proyectos && tramite.tramites_proyectos.length > 0 ? (
+                          tramite.tramites_proyectos.map((tp, idx) => {
+                            const proyecto = proyectos.find(p => p.id === tp.proyectos.id);
+                            return proyecto ? (
+                              <span key={idx} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[9px] font-bold uppercase tracking-wider border border-blue-200">
+                                {proyecto.nombre}
+                              </span>
+                            ) : null;
+                          })
+                        ) : (
+                          <span className="text-slate-300 italic text-[10px]">Sin proyectos</span>
+                        )}
+                      </div>
                     )}
                   </td>
 

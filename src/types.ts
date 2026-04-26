@@ -10,17 +10,28 @@ export interface Entidad {
   entidad: string;
 }
 
+export interface Proyecto {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+}
+
+export interface TramiteProyecto {
+  proyectos: Proyecto;
+}
+
 export interface Tramite {
   id: string;
   nombre: string;
   fecha_radicacion: string;
   fecha_estimada: string;
   responsable_id: string;
-  entidad_id: string; // Relación con la nueva tabla
+  entidad_id: string;
   observacion: string;
   estado: EstadoTramite;
-  perfiles?: Perfil; // Joined data de perfiles
-  entidades?: Entidad; // Joined data de entidades
+  perfiles?: Perfil;
+  entidades?: Entidad;
+  tramites_proyectos?: TramiteProyecto[];
 }
 
 export interface IndicadorResponsable {

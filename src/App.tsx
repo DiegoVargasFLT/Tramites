@@ -1,6 +1,7 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
+// Added harmless comment for reference
  */
 
 import React, { useState, useEffect } from 'react';
