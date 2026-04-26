@@ -551,7 +551,7 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
             <AnimatePresence mode="popLayout">
               {filteredTramites.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-20 text-center">
+                  <td colSpan={10} className="px-6 py-20 text-center">
                     <div className="flex flex-col items-center gap-3">
                       <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-300">
                         <Search size={24} />
@@ -562,59 +562,6 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
                       </p>
                     </div>
                   </td>
-<td className="px-6 py-5">
-  {editingId === tramite.id ? (
-    <div className="space-y-1">
-      <select
-        multiple
-        className="w-full p-2 text-xs border border-slate-200 rounded-lg outline-none bg-white font-medium h-24"
-        value={(editForm.responsables || []).map((r, idx) => r)}
-        onChange={e => {
-          const selectedIds = Array.from(e.target.selectedOptions, (option) => option.value);
-          setEditForm({
-            ...editForm,
-            responsables: selectedIds
-          });
-        }}
-      >
-        {perfiles.map(p => (
-          <option key={p.id} value={p.id}>{p.nombre_completo}</option>
-        ))}
-      </select>
-      <div className="text-[9px] text-slate-400">Ctrl+click para múltiple</div>
-    </div>
-  ) : (
-    <div className="flex flex-wrap gap-1 max-w-[180px]">
-      {tramite.responsables && tramite.responsables.length > 0 ? (
-        tramite.responsables.map((rid, idx) => {
-          const resp = perfiles.find(p => p.id === rid);
-          return resp ? (
-            <span key={idx} className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-[9px] font-bold uppercase tracking-wider border border-purple-200">
-              {resp.nombre_completo}
-            </span>
-          ) : null;
-        })
-      ) : (
-        <span className="text-slate-300 italic text-[10px]">Sin responsables</span>
-      )}
-    </div>
-  )}
-</td>
-
-<td className="px-6 py-5">
-  {editingId === tramite.id ? (
-    <input 
-      type="text"
-      className="bg-slate-100 border-none rounded-lg p-2 text-xs font-bold w-full"
-      value={editForm.no_radicado || ''}
-      onChange={e => setEditForm({ ...editForm, no_radicado: e.target.value })}
-    />
-  ) : (
-    <div className="text-xs text-[#1F3B6F] font-bold">
-      {tramite.no_radicado || '--'}
-    </div>
-  )}
-</td>
 
                 </tr>
               ) : filteredTramites.map((tramite) => (
