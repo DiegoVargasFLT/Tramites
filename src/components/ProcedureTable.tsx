@@ -128,7 +128,9 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
       fecha_radicacion: editForm.fecha_radicacion,
       fecha_estimada: editForm.fecha_estimada,
       responsable_id: editForm.responsable_id,
-      estado: editForm.estado
+      estado: editForm.estado,
+      no_radicado: editForm.no_radicado,
+      responsables: editForm.responsables || [],
     };
 
     try {
@@ -187,7 +189,9 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
       fecha_radicacion: new Date().toISOString().split('T')[0],
       fecha_estimada: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       observacion: '',
-      responsable_id: undefined
+      responsable_id: undefined,
+      no_radicado: '',
+      responsables: [],
     };
 
     if (!supabase) {
@@ -321,9 +325,11 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
       { header: 'Nombre Trámite', key: 'nombre', width: 40 },
       { header: 'Entidad', key: 'entidad', width: 20 },
       { header: 'Fecha Radicación', key: 'fecha_radicacion', width: 20 },
+      { header: 'No. Radicado', key: 'no_radicado', width: 20 },
       { header: 'Fecha Estimada', key: 'fecha_estimada', width: 20 },
       { header: 'Responsable', key: 'responsable', width: 25 },
       { header: 'Estado', key: 'estado', width: 15 },
+      { header: 'Responsable', key: 'responsables', width: 30 },
       { header: 'Proyectos', key: 'proyectos', width: 30 },
       { header: 'Observaciones', key: 'observaciones', width: 50 },
     ];
@@ -363,9 +369,11 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
         nombre: t.nombre,
         entidad: t.entidades?.entidad || 'Sin entidad',
         fecha_radicacion: formatDate(t.fecha_radicacion),
+        no_radicado: t.no_radicado || '',
         fecha_estimada: formatDate(t.fecha_estimada),
         responsable: t.perfiles?.nombre_completo || 'Sin asignar',
         estado: t.estado,
+        responsables: t.responsables && t.responsables.length > 0 ? t.responsables.map(rid => { const r = perfiles.find(p => p.id === rid); return r ? r.nombre_completo : ''; }).filter(Boolean).join(', ') : 'Sin responsables',
         proyectos: proyectosStr,
         observaciones: t.observacion || ''
       });
@@ -531,8 +539,10 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
               <th className="px-6 py-5 w-[110px]">Entidad</th>
               <th className={`px-6 py-5 transition-all duration-300 w-[25%]`}>Trámite</th>
               <th className="px-6 py-5 w-[130px]">Radicación</th>
+              <th className="px-6 py-5 w-[130px]">No. Radicado</th>
               <th className="px-6 py-5 w-[130px]">Estimado</th>
               <th className="px-6 py-5 w-[110px]">Estado</th>
+              <th className="px-6 py-5 w-[180px]">Responsable</th>
               <th className="px-6 py-5 min-w-[140px] max-w-[200px]">Observaciones</th>
               <th className="px-6 py-5 text-right w-[100px]">Acciones</th>
             </tr>
@@ -552,6 +562,60 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
                       </p>
                     </div>
                   </td>
+<td className="px-6 py-5">
+  {editingId === tramite.id ? (
+    <div className="space-y-1">
+      <select
+        multiple
+        className="w-full p-2 text-xs border border-slate-200 rounded-lg outline-none bg-white font-medium h-24"
+        value={(editForm.responsables || []).map((r, idx) => r)}
+        onChange={e => {
+          const selectedIds = Array.from(e.target.selectedOptions, (option) => option.value);
+          setEditForm({
+            ...editForm,
+            responsables: selectedIds
+          });
+        }}
+      >
+        {perfiles.map(p => (
+          <option key={p.id} value={p.id}>{p.nombre_completo}</option>
+        ))}
+      </select>
+      <div className="text-[9px] text-slate-400">Ctrl+click para múltiple</div>
+    </div>
+  ) : (
+    <div className="flex flex-wrap gap-1 max-w-[180px]">
+      {tramite.responsables && tramite.responsables.length > 0 ? (
+        tramite.responsables.map((rid, idx) => {
+          const resp = perfiles.find(p => p.id === rid);
+          return resp ? (
+            <span key={idx} className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-[9px] font-bold uppercase tracking-wider border border-purple-200">
+              {resp.nombre_completo}
+            </span>
+          ) : null;
+        })
+      ) : (
+        <span className="text-slate-300 italic text-[10px]">Sin responsables</span>
+      )}
+    </div>
+  )}
+</td>
+
+<td className="px-6 py-5">
+  {editingId === tramite.id ? (
+    <input 
+      type="text"
+      className="bg-slate-100 border-none rounded-lg p-2 text-xs font-bold w-full"
+      value={editForm.no_radicado || ''}
+      onChange={e => setEditForm({ ...editForm, no_radicado: e.target.value })}
+    />
+  ) : (
+    <div className="text-xs text-[#1F3B6F] font-bold">
+      {tramite.no_radicado || '--'}
+    </div>
+  )}
+</td>
+
                 </tr>
               ) : filteredTramites.map((tramite) => (
                 <motion.tr 
@@ -657,6 +721,21 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
                                         </div>
                                       )}
                                     </td>
+
+                  <td className="px-6 py-5">
+                    {editingId === tramite.id ? (
+                      <input 
+                        type="text"
+                        className="bg-slate-100 border-none rounded-lg p-2 text-xs font-bold w-full"
+                        value={editForm.no_radicado || ''}
+                        onChange={e => setEditForm({ ...editForm, no_radicado: e.target.value })}
+                      />
+                    ) : (
+                      <div className="text-xs text-[#1F3B6F] font-bold">
+                        {tramite.no_radicado || '--'}
+                      </div>
+                    )}
+                  </td>
                   
 
                   <td className="px-6 py-5">
@@ -692,6 +771,45 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
                                         <StatusBadge estado={tramite.estado} />
                                       )}
                                     </td>
+
+                  <td className="px-6 py-5">
+                    {editingId === tramite.id ? (
+                      <div className="space-y-1">
+                        <select
+                          multiple
+                          className="w-full p-2 text-xs border border-slate-200 rounded-lg outline-none bg-white font-medium h-24"
+                          value={(editForm.responsables || []).map((r, idx) => r)}
+                          onChange={e => {
+                            const selectedIds = Array.from(e.target.selectedOptions, (option) => option.value);
+                            setEditForm({
+                              ...editForm,
+                              responsables: selectedIds
+                            });
+                          }}
+                        >
+                          {perfiles.map(p => (
+                            <option key={p.id} value={p.id}>{p.nombre_completo}</option>
+                          ))}
+                        </select>
+                        <div className="text-[9px] text-slate-400">Ctrl+click para múltiple</div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-1 max-w-[180px]">
+                        {tramite.responsables && tramite.responsables.length > 0 ? (
+                          tramite.responsables.map((rid, idx) => {
+                            const resp = perfiles.find(p => p.id === rid);
+                            return resp ? (
+                              <span key={idx} className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-[9px] font-bold uppercase tracking-wider border border-purple-200">
+                                {resp.nombre_completo}
+                              </span>
+                            ) : null;
+                          })
+                        ) : (
+                          <span className="text-slate-300 italic text-[10px]">Sin responsables</span>
+                        )}
+                      </div>
+                    )}
+                  </td>
                   
 
                   <td className="px-6 py-5">
