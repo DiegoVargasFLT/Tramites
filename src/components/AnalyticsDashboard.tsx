@@ -55,19 +55,32 @@ export const AnalyticsDashboard = ({ activeFilter, onChartClick }: { activeFilte
         tramitesRes.forEach((t: any) => {
           const entName = t.entidades?.entidad || 'Sin entidad';
           const estado = t.estado || 'Pendiente';
-          const responsables = t.responsables && Array.isArray(t.responsables) ? t.responsables : [];
 
-          if (responsables.length === 0) {
-            const respKey = `Sin asignar-${estado}`;
-            if (!respMap[respKey]) respMap[respKey] = { responsable: 'Sin asignar', estado, cantidad_tramites: 0 };
-            respMap[respKey].cantidad_tramites += 1;
-          } else {
-            responsables.forEach((respName: string) => {
-              const respKey = `${respName}-${estado}`;
-              if (!respMap[respKey]) respMap[respKey] = { responsable: respName, estado, cantidad_tramites: 0 };
-              respMap[respKey].cantidad_tramites += 1;
-            });
+          // Normalizar responsables (puede ser array o string separado por / o " y ")
+          let responsables: string[] = [];
+          if (t.responsables) {
+            if (Array.isArray(t.responsables)) {
+              responsables = t.responsables;
+            } else if (typeof t.responsables === 'string') {
+              const parts = t.responsables.split(/\s*\/\s*|\s+y\s+/).map((s: string) => s.trim()).filter(Boolean);
+              responsables = parts;
+            }
           }
+
+          // Clave para agrupar: unir todos los responsables con "/" para mostrarlos juntos
+          let respKey: string;
+          let respDisplay: string;
+          if (responsables.length === 0) {
+            respKey = `Sin asignar-${estado}`;
+            respDisplay = 'Sin asignar';
+          } else {
+            // Unir nombres para que el trámite aparezca una sola vez con todos sus responsables
+            respDisplay = responsables.join(' / ');
+            respKey = `${respDisplay}-${estado}`;
+          }
+
+          if (!respMap[respKey]) respMap[respKey] = { responsable: respDisplay, estado, cantidad_tramites: 0 };
+          respMap[respKey].cantidad_tramites += 1;
 
           const entKey = `${entName}-${estado}`;
           if (!entMap[entKey]) entMap[entKey] = { entidad: entName, estado, cantidad_tramites: 0 };
