@@ -373,7 +373,7 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
         fecha_estimada: formatDate(t.fecha_estimada),
         responsable: t.perfiles?.nombre_completo || 'Sin asignar',
         estado: t.estado,
-        responsables: t.responsables && t.responsables.length > 0 ? t.responsables.map(rid => { const r = perfiles.find(p => p.id === rid); return r ? r.nombre_completo : ''; }).filter(Boolean).join(', ') : 'Sin responsables',
+        responsables: t.responsables && t.responsables.length > 0 ? t.responsables.join(', ') : 'Sin responsables',
         proyectos: proyectosStr,
         observaciones: t.observacion || ''
       });
@@ -743,14 +743,13 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
                     ) : (
                       <div className="flex flex-wrap gap-1 max-w-[180px]">
                         {tramite.responsables && tramite.responsables.length > 0 ? (
-                          tramite.responsables.map((rid, idx) => {
-                            const resp = perfiles.find(p => p.id === rid);
-                            return resp ? (
+                          <>
+                            {tramite.responsables.map((name, idx) => (
                               <span key={idx} className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-[9px] font-bold uppercase tracking-wider border border-purple-200">
-                                {resp.nombre_completo}
+                                {name}
                               </span>
-                            ) : null;
-                          })
+                            ))}
+                          </>
                         ) : (
                           <span className="text-slate-300 italic text-[10px]">Sin responsables</span>
                         )}
