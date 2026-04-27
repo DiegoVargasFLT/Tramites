@@ -195,8 +195,10 @@ const SabanaTramites = () => {
   };
 
   const tramitesFiltrados = tramites.filter(tramite => {
-    const cumpleFiltroEstado = filtroEstado === 'Todos' || tramite.estado === filtroEstado;
-    const cumpleBusqueda = tramite.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+    const estadoNormalizado = (tramite.estado || '').trim().toLowerCase();
+    const filtroNormalizado = (filtroEstado || '').trim().toLowerCase();
+    const cumpleFiltroEstado = filtroNormalizado === 'todos' || estadoNormalizado === filtroNormalizado;
+    const cumpleBusqueda = (tramite.nombre || '').toLowerCase().includes(searchTerm.toLowerCase());
     return cumpleFiltroEstado && cumpleBusqueda;
   });
 
