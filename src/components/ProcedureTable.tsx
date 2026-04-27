@@ -306,7 +306,12 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
     const matchesEstadoMain = t.estado.toLowerCase().includes(searchLower);
     
     // Advanced filters
-    const matchesRespFilter = filters.responsable ? t.responsable_id === filters.responsable : true;
+    // Filter by responsable: compare either the linked perfil ID or the name in the responsables array
+    const selectedProfile = perfiles.find(p => p.id === filters.responsable);
+    const matchesRespFilter = filters.responsable ? (
+      (t.perfiles?.id === filters.responsable) ||
+      (selectedProfile && Array.isArray(t.responsables) && t.responsables.includes(selectedProfile.nombre_completo))
+    ) : true;
     const matchesEstadoFilter = filters.estado ? t.estado === filters.estado : true;
     const matchesEntidadFilter = filters.entidad ? t.entidad_id === filters.entidad : true;
     const matchesRadicFilter = filters.fecha_radicacion ? t.fecha_radicacion === filters.fecha_radicacion : true;
