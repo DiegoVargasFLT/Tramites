@@ -727,7 +727,8 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
                           className="w-full p-2 text-xs border border-slate-200 rounded-lg outline-none bg-white font-medium h-24"
                           value={(editForm.responsables || []).map((r, idx) => r)}
                           onChange={e => {
-                            const selectedIds = Array.from(e.target.selectedOptions, (option) => option.value);
+                            const target = e.target as HTMLSelectElement;
+                            const selectedIds = Array.from(target.selectedOptions).map((option: HTMLOptionElement) => option.value);
                             setEditForm({
                               ...editForm,
                               responsables: selectedIds

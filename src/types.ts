@@ -30,6 +30,7 @@ export interface Tramite {
   observacion: string;
   estado: EstadoTramite;
   no_radicado?: string;
+  responsables?: string[];
   perfiles?: Perfil;
   entidades?: Entidad;
   tramites_proyectos?: TramiteProyecto[];

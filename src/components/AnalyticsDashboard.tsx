@@ -42,7 +42,7 @@ export const AnalyticsDashboard = ({ activeFilter, onChartClick }: { activeFilte
         .from('tramites')
         .select(`
           estado,
-          perfiles:perfiles(nombre_completo),
+          responsables,
           entidades:entidades(entidad)
         `);
       
@@ -53,13 +53,21 @@ export const AnalyticsDashboard = ({ activeFilter, onChartClick }: { activeFilte
         const entMap: Record<string, any> = {};
 
         tramitesRes.forEach((t: any) => {
-          const respName = t.perfiles?.nombre_completo || 'Sin asignar';
           const entName = t.entidades?.entidad || 'Sin entidad';
           const estado = t.estado || 'Pendiente';
+          const responsables = t.responsables && Array.isArray(t.responsables) ? t.responsables : [];
 
-          const respKey = `${respName}-${estado}`;
-          if (!respMap[respKey]) respMap[respKey] = { responsable: respName, estado, cantidad_tramites: 0 };
-          respMap[respKey].cantidad_tramites += 1;
+          if (responsables.length === 0) {
+            const respKey = `Sin asignar-${estado}`;
+            if (!respMap[respKey]) respMap[respKey] = { responsable: 'Sin asignar', estado, cantidad_tramites: 0 };
+            respMap[respKey].cantidad_tramites += 1;
+          } else {
+            responsables.forEach((respName: string) => {
+              const respKey = `${respName}-${estado}`;
+              if (!respMap[respKey]) respMap[respKey] = { responsable: respName, estado, cantidad_tramites: 0 };
+              respMap[respKey].cantidad_tramites += 1;
+            });
+          }
 
           const entKey = `${entName}-${estado}`;
           if (!entMap[entKey]) entMap[entKey] = { entidad: entName, estado, cantidad_tramites: 0 };
