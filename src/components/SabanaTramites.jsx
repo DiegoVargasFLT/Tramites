@@ -15,7 +15,8 @@ const SabanaTramites = () => {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [filtroEstado, setFiltroEstado] = useState('Todos');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filtroResponsable, setFiltroResponsable] = useState('Todos');
+  const [filtroProyecto, setFiltroProyecto] = useState('Todos');
   const [tramiteSeleccionado, setTramiteSeleccionado] = useState(null);
   const [showProyectosModal, setShowProyectosModal] = useState(false);
 
@@ -194,12 +195,31 @@ const SabanaTramites = () => {
     }
   };
 
+  // Obtener lista única de responsables para el filtro
+  const responsablesUnicos = [...new Set(
+    tramites.flatMap(t => t.responsables || [])
+  )].sort();
+
+  // Obtener lista única de proyectos para el filtro
+  const proyectosUnicos = [...new Set(
+    tramites.flatMap(t => t.proyectos || [])
+  )].sort();
+
   const tramitesFiltrados = tramites.filter(tramite => {
+    // Filtro por estado
     const estadoNormalizado = (tramite.estado || '').trim().toLowerCase();
-    const filtroNormalizado = (filtroEstado || '').trim().toLowerCase();
-    const cumpleFiltroEstado = filtroNormalizado === 'todos' || estadoNormalizado === filtroNormalizado;
-    const cumpleBusqueda = (tramite.nombre || '').toLowerCase().includes(searchTerm.toLowerCase());
-    return cumpleFiltroEstado && cumpleBusqueda;
+    const filtroEstadoNormalizado = (filtroEstado || '').trim().toLowerCase();
+    const cumpleFiltroEstado = filtroEstadoNormalizado === 'todos' || estadoNormalizado === filtroEstadoNormalizado;
+
+    // Filtro por responsable (funciona con múltiples responsables)
+    const cumpleFiltroResponsable = filtroResponsable === 'Todos' ||
+      (tramite.responsables && tramite.responsables.includes(filtroResponsable));
+
+    // Filtro por proyecto
+    const cumpleFiltroProyecto = filtroProyecto === 'Todos' ||
+      (tramite.proyectos && tramite.proyectos.includes(filtroProyecto));
+
+    return cumpleFiltroEstado && cumpleFiltroResponsable && cumpleFiltroProyecto;
   });
 
   if (loading) {
@@ -216,8 +236,8 @@ const SabanaTramites = () => {
       <div className="filtros">
         <div className="filtro-grupo">
           <label>Filtrar por Estado:</label>
-          <select 
-            value={filtroEstado} 
+          <select
+            value={filtroEstado}
             onChange={(e) => setFiltroEstado(e.target.value)}
             className="select-filtro"
           >
@@ -230,14 +250,31 @@ const SabanaTramites = () => {
         </div>
 
         <div className="filtro-grupo">
-          <label>Buscar:</label>
-          <input 
-            type="text" 
-            placeholder="Buscar por nombre del trámite..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-busqueda"
-          />
+          <label>Filtrar por Responsable:</label>
+          <select
+            value={filtroResponsable}
+            onChange={(e) => setFiltroResponsable(e.target.value)}
+            className="select-filtro"
+          >
+            <option value="Todos">Todos</option>
+            {responsablesUnicos.map(resp => (
+              <option key={resp} value={resp}>{resp}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="filtro-grupo">
+          <label>Filtrar por Proyecto:</label>
+          <select
+            value={filtroProyecto}
+            onChange={(e) => setFiltroProyecto(e.target.value)}
+            className="select-filtro"
+          >
+            <option value="Todos">Todos</option>
+            {proyectosUnicos.map(proy => (
+              <option key={proy} value={proy}>{proy}</option>
+            ))}
+          </select>
         </div>
       </div>
 
