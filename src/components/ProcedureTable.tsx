@@ -332,9 +332,8 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
       { header: 'Fecha Radicación', key: 'fecha_radicacion', width: 20 },
       { header: 'No. Radicado', key: 'no_radicado', width: 20 },
       { header: 'Fecha Estimada', key: 'fecha_estimada', width: 20 },
-      { header: 'Responsable', key: 'responsable', width: 25 },
       { header: 'Estado', key: 'estado', width: 15 },
-      { header: 'Responsable', key: 'responsables', width: 30 },
+      { header: 'Responsable(s)', key: 'responsables', width: 30 },
       { header: 'Proyectos', key: 'proyectos', width: 30 },
       { header: 'Observaciones', key: 'observaciones', width: 50 },
     ];
@@ -376,7 +375,6 @@ export const ProcedureTable = ({ onDataChange }: { onDataChange?: () => void }) 
         fecha_radicacion: formatDate(t.fecha_radicacion),
         no_radicado: t.no_radicado || '',
         fecha_estimada: formatDate(t.fecha_estimada),
-        responsable: t.perfiles?.nombre_completo || 'Sin asignar',
         estado: t.estado,
         responsables: t.responsables && t.responsables.length > 0 ? t.responsables.join(', ') : 'Sin responsables',
         proyectos: proyectosStr,
