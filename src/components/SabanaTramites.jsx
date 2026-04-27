@@ -24,7 +24,7 @@ const SabanaTramites = () => {
     nombre: '',
     fecha_radicacion: '',
     fecha_estimada: '',
-    responsable_id: '',
+    responsables: [],
     observacion: '',
     estado: '',
     proyectos_seleccionados: []
@@ -85,11 +85,6 @@ const SabanaTramites = () => {
     }
   };
 
-  const obtenerNombreResponsable = (responsable_id) => {
-    const perfil = perfiles.find(p => p.id === responsable_id);
-    return perfil ? perfil.nombre_completo : 'Sin asignar';
-  };
-
   const obtenerNombreEntidad = (entidad_id) => {
     const entidad = entidades.find(e => e.id === entidad_id);
     return entidad ? entidad.entidad : 'Sin entidad';
@@ -110,7 +105,7 @@ const SabanaTramites = () => {
       nombre: tramite.nombre,
       fecha_radicacion: tramite.fecha_radicacion,
       fecha_estimada: tramite.fecha_estimada || '',
-      responsable_id: tramite.responsable_id || '',
+      responsables: tramite.responsables || [],
       observacion: tramite.observacion || '',
       estado: tramite.estado,
       proyectos_seleccionados: proyectosDelTramite
@@ -127,8 +122,8 @@ const SabanaTramites = () => {
       nombre: '',
       fecha_radicacion: '',
       fecha_estimada: '',
-      responsable_id: '',
-      observacion: '',
+      responsables: [],
+    observacion: '',
       estado: '',
       proyectos_seleccionados: []
     });
@@ -148,7 +143,7 @@ const SabanaTramites = () => {
           nombre: editFormData.nombre,
           fecha_radicacion: editFormData.fecha_radicacion,
           fecha_estimada: editFormData.fecha_estimada || null,
-          responsable_id: editFormData.responsable_id || null,
+          responsables: editFormData.responsables || [],
           observacion: editFormData.observacion,
           estado: editFormData.estado,
           proyectos: editFormData.proyectos_seleccionados,
@@ -278,18 +273,27 @@ const SabanaTramites = () => {
                         />
                       </td>
                       <td>
-                        <select 
-                          value={editFormData.responsable_id}
-                          onChange={(e) => setEditFormData({...editFormData, responsable_id: e.target.value})}
-                          className="input-edicion"
-                        >
-                          <option value="">Sin asignar</option>
+                        <div className="multi-select-container">
                           {perfiles.map(perfil => (
-                            <option key={perfil.id} value={perfil.id}>
+                            <label key={perfil.id} className="checkbox-label">
+                              <input 
+                                type="checkbox"
+                                checked={(editFormData.responsables || []).includes(perfil.nombre_completo)}
+                                onChange={(e) => {
+                                  const selected = e.target.checked;
+                                  const name = perfil.nombre_completo;
+                                  setEditFormData(prev => ({
+                                    ...prev,
+                                    responsables: selected 
+                                      ? [...(prev.responsables || []), name]
+                                      : (prev.responsables || []).filter(r => r !== name)
+                                  }));
+                                }}
+                              />
                               {perfil.nombre_completo}
-                            </option>
+                            </label>
                           ))}
-                        </select>
+                        </div>
                       </td>
                       <td>
                         <input 
@@ -308,18 +312,27 @@ const SabanaTramites = () => {
                         />
                       </td>
                       <td>
-                        <select 
-                          value={editFormData.responsable_id}
-                          onChange={(e) => setEditFormData({...editFormData, responsable_id: e.target.value})}
-                          className="input-edicion"
-                        >
-                          <option value="">Sin asignar</option>
+                        <div className="multi-select-container">
                           {perfiles.map(perfil => (
-                            <option key={perfil.id} value={perfil.id}>
+                            <label key={perfil.id} className="checkbox-label">
+                              <input 
+                                type="checkbox"
+                                checked={(editFormData.responsables || []).includes(perfil.nombre_completo)}
+                                onChange={(e) => {
+                                  const selected = e.target.checked;
+                                  const name = perfil.nombre_completo;
+                                  setEditFormData(prev => ({
+                                    ...prev,
+                                    responsables: selected 
+                                      ? [...(prev.responsables || []), name]
+                                      : (prev.responsables || []).filter(r => r !== name)
+                                  }));
+                                }}
+                              />
                               {perfil.nombre_completo}
-                            </option>
+                            </label>
                           ))}
-                        </select>
+                        </div>
                       </td>
                       <td>
                         <select 
@@ -371,7 +384,7 @@ const SabanaTramites = () => {
                       <td>{obtenerNombreEntidad(tramite.entidad_id)}</td>
                       <td>{new Date(tramite.fecha_radicacion).toLocaleDateString('es-CO')}</td>
                       <td>{tramite.fecha_estimada ? new Date(tramite.fecha_estimada).toLocaleDateString('es-CO') : '-'}</td>
-                      <td>{obtenerNombreResponsable(tramite.responsable_id)}</td>
+                      <td>{tramite.responsables && tramite.responsables.length > 0 ? tramite.responsables.join(', ') : 'Sin responsables'}</td>
                       <td>
                         <span className={`badge estado-${tramite.estado.toLowerCase().replace(' ', '-')}`}>
                           {tramite.estado}
