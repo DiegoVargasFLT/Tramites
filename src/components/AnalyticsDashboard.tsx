@@ -188,7 +188,7 @@ export const AnalyticsDashboard = ({ activeFilter, onChartClick }: { activeFilte
           </h3>
           <div style={{ height: Math.max(300, chartData.length * 30) + 'px', width: '100%' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart layout="vertical" data={chartData} margin={{ top: 10, right: 30, left: 270, bottom: 0 }}>
+              <BarChart layout="vertical" data={chartData} margin={{ top: 10, right: 30, left: 100, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#E2E8F0" />
                 <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 10, fontWeight: 600 }} />
                 <YAxis
@@ -197,7 +197,7 @@ export const AnalyticsDashboard = ({ activeFilter, onChartClick }: { activeFilte
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: '#64748B', fontSize: 10, fontWeight: 700 }}
-                  width={260}
+                  width={200}
                   interval={0}
                 />
                 <Tooltip 
