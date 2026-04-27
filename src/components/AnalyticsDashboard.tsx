@@ -186,18 +186,20 @@ export const AnalyticsDashboard = ({ activeFilter, onChartClick }: { activeFilte
             <span className="w-2 h-2 bg-torca-azul rounded-full"></span>
             Gestión por Responsable
           </h3>
-          <div className="h-[400px] w-full">
+          <div className="h-[500px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart layout="vertical" data={chartData} margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
+              <BarChart layout="vertical" data={chartData} margin={{ top: 10, right: 30, left: 80, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#E2E8F0" />
                 <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 10, fontWeight: 600 }} />
-                <YAxis 
-                  dataKey="responsable" 
+                <YAxis
+                  dataKey="responsable"
                   type="category"
-                  axisLine={false} 
-                  tickLine={false} 
+                  axisLine={false}
+                  tickLine={false}
                   tick={{ fill: '#64748B', fontSize: 10, fontWeight: 700 }}
-                  width={100}
+                  width={180}
+                  interval={0}
+                  tickFormatter={(value: string) => value.length > 30 ? `${value.slice(0,27)}...` : value}
                 />
                 <Tooltip 
                   cursor={{ fill: '#F8FAFC' }}
@@ -248,18 +250,18 @@ export const AnalyticsDashboard = ({ activeFilter, onChartClick }: { activeFilte
             <span className="w-2 h-2 bg-rio-verde rounded-full"></span>
             Gestión por Entidad
           </h3>
-          <div className="h-[400px] w-full">
+          <div className="h-[450px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart layout="vertical" data={entityChartData} margin={{ top: 10, right: 30, left: 40, bottom: 0 }}>
+              <BarChart layout="vertical" data={entityChartData} margin={{ top: 10, right: 30, left: 80, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#E2E8F0" />
                 <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 10, fontWeight: 600 }} />
-                <YAxis 
-                  dataKey="entidad" 
+                <YAxis
+                  dataKey="entidad"
                   type="category"
-                  axisLine={false} 
-                  tickLine={false} 
+                  axisLine={false}
+                  tickLine={false}
                   tick={{ fill: '#64748B', fontSize: 10, fontWeight: 700 }}
-                  width={100}
+                  width={150}
                 />
                 <Tooltip 
                   cursor={{ fill: '#F8FAFC' }}
